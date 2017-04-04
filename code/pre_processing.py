@@ -10,6 +10,7 @@ start = time.time()
 x_train = pd.read_csv('../../data/train.csv', encoding="ISO-8859-1")
 x_test = pd.read_csv('../../data/test.csv', encoding="ISO-8859-1")
 
+
 # contains lots/different attributes for products
 attributes = pd.read_csv('../../data/attributes.csv')
 
