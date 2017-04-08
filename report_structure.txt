@@ -1,0 +1,85 @@
+
+
+Group Report
+
+❑ Title & Abstract
+❑ Introduction of the Problem
+❑ Related Work
+ 1. Do a literature review on learning to rank, including different types of methods and the
+advantages/disadvantages of each method over others. 
+
+
+❑ Experiments
+ - Methods Studied in This Report (including your proposed if any)
+ - The Statistics of the Dataset used (Project option 1 requires creating own datasets for evaluation)
+ - Metrics and Results
+ - Analysis of Results
+
+  2. Run a learning to rank algorithm of your choice and tune the parameters of the model. Using
+ appropriate metrics, show how parameter tuning affects the performance.
+ a. Useful implementations of some learning to rank algorithms can be found in RankLib as a
+ component of The Lemur Project. You are free to use other implementations/toolboxes.
+ b. It is important to come up with good features to solve this problem well. Come up with your
+ own features and analyse which features play an important role in ranking.
+
+ . SVM (SVM) Rob
+ . XGBoost (Ensemble) - Finn
+ . Perceptron (Neural Net-ish) - Indra
+ . Ulzhan
+ . Deep Learning (Neural Net) - Group
+
+❑ Discussion and Limitations
+❑ Conclusion
+❑ References (including research literature and software packages you used) 
+
+
+Individual
+
+•Introduction (very brief summary of project goals and achievements)
+•Personal Contribution (detailed description of the work conducted as an individual during the project)
+•Project Assessment (e.g., initial expectations, critical assessment of results achieved, scope for
+improvements)
+•Team Assessment
+ - Critical assessment of team overall (assessment of how well the team worked together, what could
+have been improved, how)
+ - Critical assessment of each member (strengths, weaknesses, and key contributions of each team
+member, including oneself) 
+
+
+
+
+
+### Moodle ###
+
+https://moodle.ucl.ac.uk/mod/forum/discuss.php?d=816633
+Please note that in this task you are actually asked to build a model that can accurately predict the relevance of search results. Hence, in this project option, you have to use more classical machine learning algorithms for classification. To solve it well you have to concentrate on preprocessing and building the right features as mentioned in the description.  
+
+https://moodle.ucl.ac.uk/mod/forum/discuss.php?d=809361
+"Literature review" and "related work" are terminologues used to refer to the same thing, a review of literature related to the project. So, you are expected to provide a literature review in the group report (the part referred to as related work). 
+
+
+### EMAIL ###
+
+The slide says we should do a literature review on learning to rank, including different types of methods. As we understand there are 3 main types – pointwise, pairwise and listwise. We feel that in this case only pointwise is applicable. Is this correct and if yes, then do we need to do a literature review on pairwise and listwise approaches even if they don’t apply to our problem?
+ > Yes, you should.
+
+Should we be looking at the problem as a classification or a regression problem? There are 13 different scores. We could use 13 different classes (or maybe bucket the scores in a smaller number of classes). Is this a valid approach or is the relatively small number of classes a red herring and we should be using only regression?
+> You are expected to make your own decisions regarding this.
+
+How many models are we expected to do? We were planning to do a method each and then compare the results. Is this a valid approach for this project or do you expect us to more focus on features, for example, implement only 1 or 2 algorithms and then try many different features on them instead?
+> You can focus either on building different models or different features, either is fine.
+
+How the literature review/motivation should be for the deep learning part? I failed to find good papers on applying neural networks to query scoring problems (there were some on document pairwise comparison). Would it be OK if we just tried some general deep learning approaches without basing it on specific papers or would we lose marks for that?
+> Deep learning specific to ranking is preferred, but you would still get some credit for using general deep learning algorithms.
+ 
+In general, you can decide the parts you would like to focus on and explore more; the project is not too strict to encourage students' doing research and making decisions on their own.
+
+
+
+
+
+
+
+
+
+

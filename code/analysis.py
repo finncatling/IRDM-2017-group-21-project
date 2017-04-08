@@ -46,8 +46,15 @@ x_test = x_test.drop(['search_term','product_title','product_description','produ
 
 rf = RandomForestRegressor(n_estimators=15, max_depth=6, random_state=0)
 clf = BaggingRegressor(rf, n_estimators=45, max_samples=0.1, random_state=25)
-#clf = svm.SVC()
-#clf = LinearSVR()
+
+
+# convert labels into classes for classification
+'''
+from sklearn import preprocessing
+le = preprocessing.LabelEncoder()
+le.fit([1.0,1.25,1.33,1.5,1.67,1.75,2.0,2.25,2.33,2.5,2.67,2.75, 3])
+y_train = le.transform(y_train)
+'''
 
 clf.fit(x_train, y_train)
 y_pred = clf.predict(x_test)
@@ -70,3 +77,8 @@ print(y_pred_public[:100])
 
 duration = time.time() - start
 print(duration)
+
+
+
+
+
