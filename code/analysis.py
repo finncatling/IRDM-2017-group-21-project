@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import time
+np.set_printoptions(threshold=np.Inf)
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -33,10 +34,11 @@ with open(pickle_file, 'rb') as f:
   print('training size', x_train.shape, y_train.shape)
   print('test size', x_test.shape)
 
-#print('training glance', x_train.head())
-#print('training glance', x_train.columns)
-
 y_test = pd.read_csv('../../data/solution.csv', encoding="ISO-8859-1")
+test_id = x_test['id']
+
+output = x_train.head(100)
+output.to_csv('output.csv')
 
 x_train = x_train.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
 x_test = x_test.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
@@ -47,8 +49,7 @@ x_test = x_test.drop(['search_term','product_title','product_description','produ
 rf = RandomForestRegressor(n_estimators=15, max_depth=6, random_state=0)
 clf = BaggingRegressor(rf, n_estimators=45, max_samples=0.1, random_state=25)
 
-
-# convert labels into classes for classification
+# convert labels to classes for classifcation
 '''
 from sklearn import preprocessing
 le = preprocessing.LabelEncoder()
@@ -56,10 +57,11 @@ le.fit([1.0,1.25,1.33,1.5,1.67,1.75,2.0,2.25,2.33,2.5,2.67,2.75, 3])
 y_train = le.transform(y_train)
 '''
 
+
 clf.fit(x_train, y_train)
 y_pred = clf.predict(x_test)
 
-pd.DataFrame({"id": x_test['id'], "relevance": y_pred}).to_csv('submission.csv',index=False)
+pd.DataFrame({"id": test_id, "relevance": y_pred}).to_csv('submission.csv',index=False)
 
 public_idx = y_test['Usage']=='Public'
 private_idx = y_test['Usage']=='Private'

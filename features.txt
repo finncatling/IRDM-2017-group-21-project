@@ -1,0 +1,47 @@
+
+
+### FILES and attributes ###
+
+1. Train.csv
+-a. Relevance
+-b. Search Term
+-c. Product Title
+
+2. Product_escription.csv
+a. product_description
+
+3. Attributes
+a. name
+a. value
+c .Brand derrived from name and value
+
+Corpus = Search Term (1b) + Product Title (1c) + Product Description (2a) + Brand (3c)
+
+
+### FEATURES ###
+
+Lengths
+-search term
+-product title
+-description
+-brand
+
+Does search term appear in:
+-product title
+-description
+
+How many common words with search term and:
+-product title
+-description
+-brand
+
+Ratio of words in target to words in serach term:
+-product title
+-description
+-brand
+
+Number of letters in:
+-search term
+
+
+
