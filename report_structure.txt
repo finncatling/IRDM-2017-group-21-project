@@ -25,8 +25,7 @@ advantages/disadvantages of each method over others.
  . SVM (SVM) Rob
  . XGBoost (Ensemble) - Finn
  . Perceptron (Neural Net-ish) - Indra
- . Ulzhan
- . Deep Learning (Neural Net) - Group
+ . Deep Learning (Neural Net) - Ulzhan
 
 ❑ Discussion and Limitations
 ❑ Conclusion
