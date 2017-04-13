@@ -3,6 +3,7 @@ import pandas as pd
 import funcs as f
 import time
 import pickle
+from spelling import *
 
 start = time.time()
 
@@ -31,12 +32,11 @@ x_all = pd.concat((x_train, x_test), axis=0, ignore_index=True)
 x_all = pd.merge(x_all, description, how='left', on='product_uid')
 x_all = pd.merge(x_all, brand, how='left', on='product_uid')
 
-
 # define corpora
-x_all['search_term'] = x_all['search_term'].map(lambda x:f.str_stem(x))
-x_all['product_title'] = x_all['product_title'].map(lambda x:f.str_stem(x))
-x_all['product_description'] = x_all['product_description'].map(lambda x:f.str_stem(x))
-x_all['brand'] = x_all['brand'].map(lambda x:f.str_stem(x))
+x_all['search_term'] = x_all['search_term'].map(lambda x:f.word_stem(x))
+x_all['product_title'] = x_all['product_title'].map(lambda x:f.word_stem(x))
+x_all['product_description'] = x_all['product_description'].map(lambda x:f.word_stem(x))
+x_all['brand'] = x_all['brand'].map(lambda x:f.word_stem(x))
 
 ### create length features
 x_all['len_of_query'] = x_all['search_term'].map(lambda x:len(x.split())).astype(np.int64)
@@ -44,19 +44,18 @@ x_all['len_of_title'] = x_all['product_title'].map(lambda x:len(x.split())).asty
 x_all['len_of_description'] = x_all['product_description'].map(lambda x:len(x.split())).astype(np.int64)
 x_all['len_of_brand'] = x_all['brand'].map(lambda x:len(x.split())).astype(np.int64)
 
-
 # concatenate corpora serach term, product title and product description / brand is defined separately in attr
 x_all['product_info'] = x_all['search_term']+"\t"+x_all['product_title'] +"\t"+x_all['product_description']
 x_all['attr'] = x_all['search_term']+"\t"+x_all['brand']
 
 ### does search term appear in: (brand added no information)
-x_all['query_in_title'] = x_all['product_info'].map(lambda x:f.str_whole_word(x.split('\t')[0],x.split('\t')[1],0))
-x_all['query_in_description'] = x_all['product_info'].map(lambda x:f.str_whole_word(x.split('\t')[0],x.split('\t')[2],0))
+x_all['query_in_title'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[1],0))
+x_all['query_in_description'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[2],0))
 
 ### how many common words
-x_all['word_in_title'] = x_all['product_info'].map(lambda x:f.str_common_word(x.split('\t')[0],x.split('\t')[1]))
-x_all['word_in_description'] = x_all['product_info'].map(lambda x:f.str_common_word(x.split('\t')[0],x.split('\t')[2]))
-x_all['word_in_brand'] = x_all['attr'].map(lambda x:f.str_common_word(x.split('\t')[0],x.split('\t')[1]))
+x_all['word_in_title'] = x_all['product_info'].map(lambda x:f.word_intersection(x.split('\t')[0],x.split('\t')[1]))
+x_all['word_in_description'] = x_all['product_info'].map(lambda x:f.word_intersection(x.split('\t')[0],x.split('\t')[2]))
+x_all['word_in_brand'] = x_all['attr'].map(lambda x:f.word_intersection(x.split('\t')[0],x.split('\t')[1]))
 
 ### ratio of words in target to search term
 x_all['ratio_title'] = x_all['word_in_title']/x_all['len_of_query']
@@ -80,7 +79,7 @@ print('x_train shape', x_train.shape)
 print('x_test shape', x_test.shape)
 
 # pickle the data
-pickle_file = '../../data/pre_processed_data.pickle'
+pickle_file = '../../data/pre_processed_data_spell10.pickle'
 
 f = open(pickle_file, 'wb')
 save = {
@@ -93,19 +92,6 @@ f.close()
 
 duration = time.time() - start
 print(duration)
-
-
-
-'''
-brand = pd.unique(x_all.brand.ravel())
-d={}
-i = 1
-for s in brand:
-    d[s]=i
-    i+=1
-
-x_all['brand_feature'] = x_all['brand'].map(lambda x:d[x])
-'''
 
 
 

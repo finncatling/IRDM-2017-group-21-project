@@ -10,7 +10,7 @@
 2. Product_escription.csv
 a. product_description
 
-3. Attributes
+3. Attributes.csv
 a. name
 a. value
 c .Brand derrived from name and value
@@ -42,6 +42,8 @@ Ratio of words in target to words in serach term:
 
 Number of letters in:
 -search term
+
+
 
 
 

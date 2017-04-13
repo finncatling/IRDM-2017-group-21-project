@@ -1,0 +1,26 @@
+
+
+
+LR = lit review
+
+						SVMs (1) 		Ensembles (2)					Perceptron (3)		ANOTHER (4) 		Deep learning (5)
+LR Point		Rob (SVR)		Finn (grad boost)			Indra
+LR Pair			(RankSVM)		Finn (lambdamart)			
+LR List			(SVMMap)		Finn (lambdamart)
+Features
+Model				Rob					Finn (grad boost)			Indra			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

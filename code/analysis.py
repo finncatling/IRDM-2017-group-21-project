@@ -10,7 +10,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import StandardScaler
-#from sklearn import pipeline, grid_search
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import FeatureUnion
@@ -23,7 +22,7 @@ from sklearn.svm import LinearSVR
 
 start = time.time()
 
-pickle_file = '../../data/pre_processed_data.pickle'
+pickle_file = '../../data/pre_processed_data_spell10.pickle'
 
 with open(pickle_file, 'rb') as f:
   save = pickle.load(f)
@@ -57,7 +56,6 @@ le.fit([1.0,1.25,1.33,1.5,1.67,1.75,2.0,2.25,2.33,2.5,2.67,2.75, 3])
 y_train = le.transform(y_train)
 '''
 
-
 clf.fit(x_train, y_train)
 y_pred = clf.predict(x_test)
 
@@ -72,8 +70,8 @@ y_private = y_test[private_idx]['relevance']
 y_pred_public = y_pred[public_idx]
 y_pred_private = y_pred[private_idx]
 
-print('public score',fc.fmean_squared_error(y_public,y_pred_public))
-print('private score',fc.fmean_squared_error(y_private,y_pred_private))
+print('public score',fc.ms_error(y_public,y_pred_public))
+print('private score',fc.ms_error(y_private,y_pred_private))
 
 print(y_pred_public[:100])
 
