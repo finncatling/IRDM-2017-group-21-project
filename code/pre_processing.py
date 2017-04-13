@@ -11,7 +11,6 @@ start = time.time()
 x_train = pd.read_csv('../../data/train.csv', encoding="ISO-8859-1")
 x_test = pd.read_csv('../../data/test.csv', encoding="ISO-8859-1")
 
-
 # contains lots/different attributes for products
 attributes = pd.read_csv('../../data/attributes.csv')
 
@@ -49,8 +48,8 @@ x_all['product_info'] = x_all['search_term']+"\t"+x_all['product_title'] +"\t"+x
 x_all['attr'] = x_all['search_term']+"\t"+x_all['brand']
 
 ### does search term appear in: (brand added no information)
-x_all['query_in_title'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[1],0))
-x_all['query_in_description'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[2],0))
+x_all['query_in_title'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[1]))
+x_all['query_in_description'] = x_all['product_info'].map(lambda x:f.term_intersection(x.split('\t')[0],x.split('\t')[2]))
 
 ### how many common words
 x_all['word_in_title'] = x_all['product_info'].map(lambda x:f.word_intersection(x.split('\t')[0],x.split('\t')[1]))
@@ -79,7 +78,7 @@ print('x_train shape', x_train.shape)
 print('x_test shape', x_test.shape)
 
 # pickle the data
-pickle_file = '../../data/pre_processed_data_spell10.pickle'
+pickle_file = '../../data/pre_processed_data.pickle'
 
 f = open(pickle_file, 'wb')
 save = {
