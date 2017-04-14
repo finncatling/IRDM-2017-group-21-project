@@ -3,7 +3,7 @@ import nltk
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.metrics import mean_squared_error, make_scorer
-from code.spelling import *
+from spelling import *
 
 
 stemmer = PorterStemmer()
@@ -58,19 +58,14 @@ def term_intersection(term1, term2):
     return count
 
 
-def word_intersection(needles, haystack):
+def word_intersection(term1, term2):
+    words = term1.split()
     count = 0
-    needles, haystack = set(needles), set(haystack)
-    for needle in needles:
-        if needle in haystack:
-            count += 1
-    return count
 
-
-def count_letters(words):
-    count = 0
     for word in words:
-        count += len(word)
+        if term2.find(word) >= 0:
+            count += 1
+
     return count
 
 

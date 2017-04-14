@@ -18,30 +18,40 @@ with open(pickle_file, 'rb') as file:
   x_test = save['x_test']
   del save
 
-# does search term appear in: (brand added no information)
+
 print('Temporarily re-joining string lists...', round((time.time() - start) / 60, 2))
 x_all['search_term_joined'] = x_all['search_term'].str.join(" ")
 x_all['product_title_joined'] = x_all['product_title'].str.join(" ")
 x_all['product_description_joined'] = x_all['product_description'].str.join(" ")
+x_all['brand_joined'] = x_all['brand'].str.join(" ")
 
-print('Looking for search terms in title...', round((time.time() - start) / 60, 2))
-x_all['query_in_title'] = x_all.apply(
-    lambda x: f.term_intersection(x['search_term_joined'], x['product_title_joined']), axis=1)
-print('Looking for search terms in description...', round((time.time() - start) / 60, 2))
-x_all['query_in_description'] = x_all.apply(
-    lambda x: f.term_intersection(x['search_term_joined'], x['product_description_joined']), axis=1)
+# concatenate corpora search term, product title and product description / brand is defined separately in attr
+x_all['product_info'] = (
+    x_all['search_term_joined'] +
+    "\t" +
+    x_all['product_title_joined'] +
+    "\t" +
+    x_all['product_description_joined']
+)
+x_all['attr'] = x_all['search_term_joined'] + "\t" + x_all['brand_joined']
 
 
-# how many common words
-print('Looking for common words in title...', round((time.time() - start) / 60, 2))
-x_all['word_in_title'] = x_all.apply(
-    lambda x: f.word_intersection(x['search_term'], x['product_title']), axis=1)
-print('Looking for common words in description...', round((time.time() - start) / 60, 2))
-x_all['word_in_description'] = x_all.apply(
-    lambda x: f.word_intersection(x['search_term'], x['product_description']), axis=1)
-print('Looking for common words in brand...', round((time.time() - start) / 60, 2))
-x_all['word_in_brand'] = x_all.apply(
-    lambda x: f.word_intersection(x['search_term'], x['brand']), axis=1)
+### does search term appear in: (brand added no information)
+print('Looking for search terms...', round((time.time() - start) / 60, 2))
+x_all['query_in_title'] = x_all['product_info'].map(
+    lambda x: f.term_intersection(x.split('\t')[0], x.split('\t')[1]))
+x_all['query_in_description'] = x_all['product_info'].map(
+    lambda x: f.term_intersection(x.split('\t')[0], x.split('\t')[2]))
+
+
+### how many common words
+print('Looking for common words...', round((time.time() - start) / 60, 2))
+x_all['word_in_title'] = x_all['product_info'].map(
+    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[1]))
+x_all['word_in_description'] = x_all['product_info'].map(
+    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[2]))
+x_all['word_in_brand'] = x_all['attr'].map(
+    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[1]))
 
 
 # ratio of words in target to search term
@@ -53,7 +63,15 @@ x_all['ratio_brand'] = x_all['word_in_brand'] / x_all['len_of_brand']
 
 # letters in search term
 print('Counting letters in search term...', round((time.time() - start) / 60, 2))
-x_all['search_term_feature'] = x_all['search_term'].map(lambda x: f.count_letters(x))
+x_all['search_term_feature'] = x_all['search_term_joined'].map(lambda x: len(x))
+
+
+# Get rid of temp columns
+x_all.drop([
+    'search_term_joined',
+    'product_title_joined',
+    'product_description_joined'
+], axis=1, inplace=True)
 
 
 print('Saving data...', round((time.time() - start) / 60, 2))
