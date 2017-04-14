@@ -6,13 +6,8 @@ import pickle
 from sklearn.utils import shuffle
 
 
-stem = True  # consider skipping in neural models as GloVe embeddings are mapped to words
-remove_stopwords = True  # consider skipping in neural models
-remove_punctuation = True  # consider skipping in neural models
-
 seed = 1
 start = time.time()
-
 
 print('Loading data...')
 # train and test sets
@@ -40,16 +35,13 @@ x_all = pd.concat((x_train, x_test), axis=0, ignore_index=True)
 x_all = pd.merge(x_all, description, how='left', on='product_uid')
 x_all = pd.merge(x_all, brand, how='left', on='product_uid')
 
+
 # define corpora
-print('Processing strings...', round((time.time() - start) / 60, 2))
-x_all['search_term'] = x_all['search_term'].map(
-    lambda x: f.process_words(x, stem, remove_stopwords, remove_punctuation))
-x_all['product_title'] = x_all['product_title'].map(
-    lambda x: f.process_words(x, stem, remove_stopwords, remove_punctuation))
-x_all['product_description'] = x_all['product_description'].map(
-    lambda x: f.process_words(x, stem, remove_stopwords, remove_punctuation))
-x_all['brand'] = x_all['brand'].map(
-    lambda x: f.process_words(x, stem, remove_stopwords, remove_punctuation))
+print('Processing strings (in parallel)...', round((time.time() - start) / 60, 2))
+x_all = f.parallelize_dataframe(x_all, f.process_strings_search)
+x_all = f.parallelize_dataframe(x_all, f.process_strings_title)
+x_all = f.parallelize_dataframe(x_all, f.process_strings_description)
+x_all = f.parallelize_dataframe(x_all, f.process_strings_brand)
 
 # create length features
 print('Counting lengths...', round((time.time() - start) / 60, 2))
@@ -75,20 +67,15 @@ x_all['product_info'] = (
 x_all['attr'] = x_all['search_term_joined'] + "\t" + x_all['brand_joined']
 
 ### does search term appear in: (brand added no information)
-print('Looking for search terms...', round((time.time() - start) / 60, 2))
-x_all['query_in_title'] = x_all['product_info'].map(
-    lambda x: f.term_intersection(x.split('\t')[0], x.split('\t')[1]))
-x_all['query_in_description'] = x_all['product_info'].map(
-    lambda x: f.term_intersection(x.split('\t')[0], x.split('\t')[2]))
+print('Looking for search terms (in parallel)...', round((time.time() - start) / 60, 2))
+x_all = f.parallelize_dataframe(x_all, f.find_search_terms_title)
+x_all = f.parallelize_dataframe(x_all, f.find_search_terms_description)
 
 ### how many common words
-print('Looking for common words...', round((time.time() - start) / 60, 2))
-x_all['word_in_title'] = x_all['product_info'].map(
-    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[1]))
-x_all['word_in_description'] = x_all['product_info'].map(
-    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[2]))
-x_all['word_in_brand'] = x_all['attr'].map(
-    lambda x: f.word_intersection(x.split('\t')[0], x.split('\t')[1]))
+print('Looking for common words (in parallel)...', round((time.time() - start) / 60, 2))
+x_all = f.parallelize_dataframe(x_all, f.find_common_words_title)
+x_all = f.parallelize_dataframe(x_all, f.find_common_words_description)
+x_all = f.parallelize_dataframe(x_all, f.find_common_words_brand)
 
 # ratio of words in target to search term
 print('Calculating words ratios...', round((time.time() - start) / 60, 2))
