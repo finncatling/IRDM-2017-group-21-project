@@ -41,8 +41,7 @@ def process_words(words, stem=True, remove_stopwords=True, remove_punctuation=Tr
         return "null"
 
 
-def term_intersection(needle, haystack):
-    term1, term2 = " ".join(needle), " ".join(haystack)
+def term_intersection(term1, term2):
     count = 0
     counter = 0
 
@@ -61,8 +60,9 @@ def term_intersection(needle, haystack):
 
 def word_intersection(needles, haystack):
     count = 0
+    needles, haystack = set(needles), set(haystack)
     for needle in needles:
-        if haystack.count(needle) > 0:
+        if needle in haystack:
             count += 1
     return count
 
