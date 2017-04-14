@@ -163,4 +163,33 @@ def ms_error(y, y_hat):
     return ms_error_cal
 
 
+def bm25(
+        row,
+        collection,  # e.g. 'product_title'
+        avg_length,  # average document length in collection
+        text_mats,
+        vocab,
+        k1=1.6,  # typically set between 1.2 and 2.0
+        b=0.75  # typically set at 0.75
+):
+    """Calculates BM25 as per Wikipedia formula when applied over DataFrame."""
+    score = 0
+
+    if collection == 'product_title':
+        doc_length = row['len_of_title']
+    elif collection == 'product_description':
+        doc_length = row['len_of_description']
+
+    for term in row['search_term']:
+        nq = text_mats[collection][:, vocab[term]].nnz  # n docs containing term
+        idf = np.log((text_mats[collection].shape[0] - nq + 0.5) / (nq + 0.5))
+        term_freq = text_mats[collection][row.name, vocab[term]]
+        score += idf * (
+            (term_freq * (k1 + 1)) /
+            (term_freq + k1 * (1 - b + b * doc_length / avg_length))
+        )
+
+    return score
+
+
 RMSE = make_scorer(ms_error, greater_is_better=False)

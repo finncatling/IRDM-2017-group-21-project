@@ -61,52 +61,25 @@ df['title_cos_sim'] = title_cos_sim
 df['description_cos_sim'] = description_cos_sim
 
 
-def bm25(
-        row,
-        collection,  # e.g. 'product_title'
-        avg_length,  # average document length in collection
-        k1=1.6,  # typically set between 1.2 and 2.0
-        b=0.75,  # typically set at 0.75
-        text_mats=text_mats,
-        vocab=vectorizers['search_term'].vocabulary_
-):
-    """Calculates BM25 as per Wikipedia formula when applied over DataFrame."""
-    score = 0
-
-    if collection == 'product_title':
-        doc_length = row['len_of_title']
-    elif collection == 'product_description':
-        doc_length = row['len_of_description']
-
-    for term in row['search_term']:
-        nq = text_mats[collection][:, vocab[term]].nnz  # n docs containing term
-        idf = np.log((text_mats[collection].shape[0] - nq + 0.5) / (nq + 0.5))
-        term_freq = text_mats[collection][row.name, vocab[term]]
-        score += idf * (
-            (term_freq * (k1 + 1)) /
-            (term_freq + k1 * (1 - b + b * doc_length / avg_length))
-        )
-
-    return score
-
-
+print('Calculating BM25...', round((time.time() - start) / 60, 2))
 title_mean = df['len_of_title'].mean()
 description_mean = df['len_of_description'].mean()
 
 
 def bm25_title(df):
-    df['bm25_title'] = df.apply(lambda x: bm25(
-        x, 'product_title', title_mean), axis=1)
+    df['bm25_title'] = df.apply(lambda x: f.bm25(
+        x, 'product_title', title_mean, text_mats,
+        vectorizers['search_term'].vocabulary_), axis=1)
     return df
 
 
 def bm25_description(df):
-    df['bm25_description'] = df.apply(
-        lambda x: bm25(x, 'product_description', description_mean), axis=1)
+    df['bm25_description'] = df.apply(lambda x: f.bm25(
+        x, 'product_description', description_mean, text_mats,
+        vectorizers['search_term'].vocabulary_), axis=1)
     return df
 
 
-print('Calculating BM25...', round((time.time() - start) / 60, 2))
 df = f.parallelize_dataframe(df, bm25_title)
 df = f.parallelize_dataframe(df, bm25_description)
 
