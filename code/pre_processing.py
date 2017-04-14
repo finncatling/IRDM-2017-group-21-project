@@ -92,18 +92,20 @@ x_all.drop([
     'search_term_joined',
     'product_title_joined',
     'product_description_joined',
-    'brand_joined'
+    'brand_joined',
+    'attr',
+    'product_info'
 ], axis=1, inplace=True)
 
 print('Saving data...', round((time.time() - start) / 60, 2))
 print('x_all shape', x_all.shape)
 
 # save to csv file to view
-x_all.to_csv('../../data/x_all.csv')
-x_all = pd.read_csv('../../data/x_all.csv', encoding="ISO-8859-1", index_col=0)
+x_all.to_pickle('../../data/x_all.pkl')
+# x_all = pd.read_csv('../../data/x_all.csv', encoding="ISO-8859-1", index_col=0)
 
 # separate train and test
-train_size = x_train.shape[0]
+train_size = x_train.shape[0]  # TODO: change sizes around
 x_train = x_all[:train_size]
 x_test = x_all[train_size:]
 print('x_train shape', x_train.shape)
