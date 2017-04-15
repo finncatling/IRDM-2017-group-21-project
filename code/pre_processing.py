@@ -148,7 +148,7 @@ x_all['title_cos_sim'] = title_cos_sim
 x_all['description_cos_sim'] = description_cos_sim
 
 
-print('Calculating BM25...', round((time.time() - start) / 60, 2))
+print('Calculating title BM25 (in parallel)...', round((time.time() - start) / 60, 2))
 title_mean = x_all['len_of_title'].mean()
 description_mean = x_all['len_of_description'].mean()
 
@@ -168,6 +168,7 @@ def bm25_description(x_all):
 
 
 x_all = f.parallelize_dataframe(x_all, bm25_title)
+print('Calculating description BM25 (in parallel)...', round((time.time() - start) / 60, 2))
 x_all = f.parallelize_dataframe(x_all, bm25_description)
 
 

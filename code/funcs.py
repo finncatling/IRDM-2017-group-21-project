@@ -20,6 +20,7 @@ stemmer = PorterStemmer()
 stops = set(stopwords.words("english"))
 punct = set(string.punctuation)
 print(nltk.__version__, '<- needs to be less than 3.2.2')
+print('Parallel computations will use', cpu_count(), 'cores...')
 
 
 def parallelize_dataframe(df, func):

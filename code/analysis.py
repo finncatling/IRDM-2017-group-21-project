@@ -1,14 +1,13 @@
-
 import funcs as fc
 import numpy as np
 import pandas as pd
 import pickle
 import time
-np.set_printoptions(threshold=np.Inf)
 from sklearn.ensemble import RandomForestRegressor, BaggingRegressor
 
-start = time.time()
 
+np.set_printoptions(threshold=np.Inf)
+start = time.time()
 pickle_file = '../../data/pre_processed_data.pickle'
 
 with open(pickle_file, 'rb') as f:
