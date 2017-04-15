@@ -10,7 +10,8 @@ from spelling import *
 
 
 stem = True  # consider skipping in neural models as GloVe embeddings are mapped to words
-remove_stopwords = True  # consider skipping in neural models
+# remove_stopwords = True  # consider skipping in neural models
+remove_stopwords = False
 remove_punctuation = True  # consider skipping in neural models
 
 
