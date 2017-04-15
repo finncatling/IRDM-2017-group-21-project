@@ -4,6 +4,8 @@ import funcs as f
 import time
 import pickle
 from sklearn.utils import shuffle
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.preprocessing import normalize
 
 
 seed = 1
@@ -92,28 +94,99 @@ x_all.drop([
     'search_term_joined',
     'product_title_joined',
     'product_description_joined',
-    'brand_joined',
-    'attr',
-    'product_info'
+    'brand_joined'
 ], axis=1, inplace=True)
+
+
+print('Extracting vocabulary...', round((time.time() - start) / 60, 2))
+vocab = []
+for i, r in x_all.iterrows():
+    for col in ['product_title', 'search_term', 'product_description']:
+        vocab += r[col]
+vocab = set(vocab)
+
+
+print('Deriving bag-of-words counts...', round((time.time() - start) / 60, 2))
+vectorizers, text_mats = dict(), dict()
+# transformers, tfidf_mats = dict(), dict()
+for col in ['product_title', 'search_term', 'product_description']:
+    vectorizers[col] = CountVectorizer(vocabulary=vocab)
+    text_mats[col] = vectorizers[col].fit_transform(x_all[col].str.join(' ').values)
+    # transformers[col] = TfidfTransformer()
+    # tfidf_mats[col] = transformers[col].fit_transform(text_mats[col])
+
+
+print('Calculating cosine similarity...', round((time.time() - start) / 60, 2))
+text_mats_norm = dict()
+for col in [
+    'product_title',
+    'search_term',
+    'product_description'
+]:
+    text_mats_norm[col] = normalize(text_mats[col])
+
+matrix_chunks = 8  # lower numbers use more ram but compute cos similarity quicker
+chunk_i = [0]
+for i in range(matrix_chunks - 1):
+    chunk_i.append(
+        round(text_mats_norm['search_term'].shape[0] / matrix_chunks) * (i + 1)
+    )
+chunk_i.append(text_mats_norm['search_term'].shape[0])
+
+title_cos_sim, description_cos_sim = [], []
+x_all['title_cos_sim'], x_all['description_cos_sim'] = np.nan, np.nan
+for i in range(matrix_chunks):
+    title_cos_sim += list(np.dot(
+        text_mats_norm['search_term'][chunk_i[i]:chunk_i[i + 1], :],
+        text_mats_norm['product_title'][chunk_i[i]:chunk_i[i + 1], :].T
+    ).diagonal())
+    description_cos_sim += list(np.dot(
+        text_mats_norm['search_term'][chunk_i[i]:chunk_i[i + 1], :],
+        text_mats_norm['product_description'][chunk_i[i]:chunk_i[i + 1], :].T
+    ).diagonal())
+x_all['title_cos_sim'] = title_cos_sim
+x_all['description_cos_sim'] = description_cos_sim
+
+
+print('Calculating BM25...', round((time.time() - start) / 60, 2))
+title_mean = x_all['len_of_title'].mean()
+description_mean = x_all['len_of_description'].mean()
+
+
+def bm25_title(x_all):
+    x_all['bm25_title'] = x_all.apply(lambda x: f.bm25(
+        x, 'product_title', title_mean, text_mats,
+        vectorizers['search_term'].vocabulary_), axis=1)
+    return x_all
+
+
+def bm25_description(x_all):
+    x_all['bm25_description'] = x_all.apply(lambda x: f.bm25(
+        x, 'product_description', description_mean, text_mats,
+        vectorizers['search_term'].vocabulary_), axis=1)
+    return x_all
+
+
+x_all = f.parallelize_dataframe(x_all, bm25_title)
+x_all = f.parallelize_dataframe(x_all, bm25_description)
+
 
 print('Saving data...', round((time.time() - start) / 60, 2))
 print('x_all shape', x_all.shape)
 
-# save to csv file to view
+# Pickle dataframe
 x_all.to_pickle('../../data/x_all.pkl')
 # x_all = pd.read_csv('../../data/x_all.csv', encoding="ISO-8859-1", index_col=0)
 
 # separate train and test
-train_size = x_train.shape[0]  # TODO: change sizes around
-x_train = x_all[:train_size]
-x_test = x_all[train_size:]
+train_size = x_train.shape[0]  # TODO: check train/test sizes are as expected
+x_train = x_all[:][:train_size]
+x_test = x_all[:][train_size:]
 print('x_train shape', x_train.shape)
 print('x_test shape', x_test.shape)
 
 # shuffle data
 x_train, y_train = shuffle(x_train, y_train, random_state=seed)
-x_test = shuffle(x_test, random_state=seed)
 
 # pickle the data
 pickle_file = '../../data/pre_processed_data.pickle'

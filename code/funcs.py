@@ -31,21 +31,6 @@ def parallelize_dataframe(df, func):
     return df
 
 
-def parallelize_dataframe_df(df, func):
-    """Operates on DataFrames, not ndarrays"""
-    chunk_i, partitions = [0], []
-    for i in range(num_partitions - 1):
-        chunk_i.append(round(df.shape[0] / num_partitions) * (i + 1))
-        partitions.append(df[:][chunk_i[-2]:chunk_i[-1]])
-    partitions.append(df[:][chunk_i[-1]:])
-
-    pool = Pool(num_cores)
-    df = pd.concat(pool.map(func, partitions))
-    pool.close()
-    pool.join()
-    return df
-
-
 def process_strings_search(x_all):
     x_all['search_term'] = x_all['search_term'].map(
         lambda x: process_words(x, stem, remove_stopwords, remove_punctuation))
