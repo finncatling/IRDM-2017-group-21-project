@@ -4,6 +4,7 @@ Information retrieval and data mining assignment
 ### pre-processed data
 
 - 15/4/17, including punkt tokenisation, stopword and punctuation removal, stemming, cosine similarity, bm25, shuffled training data: https://we.tl/E7vIV6y8kD
+- 15/4/17, including punkt tokenisation, punctuation removal **but stopwords left in**, stemming, cosine similarity, bm25, shuffled training data: https://we.tl/JMcSxVLVAg
 
 ### files/directories
 
