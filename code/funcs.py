@@ -1,4 +1,6 @@
 import re
+import pandas as pd
+import numpy as np
 from nltk.stem.porter import *
 from sklearn.metrics import mean_squared_error, make_scorer
 stemmer = PorterStemmer()
@@ -63,6 +65,30 @@ def term_intersection(term1, term2):
 
     return count
 
+
+def split_val_set(x_, y_, val_ratio, col_name):
+    num_points = x_.shape[0]
+    val_size_needed = np.floor(num_points * val_ratio).astype(int)
+    # get all unique values and how many times they occur
+    dif_items, item_counts = np.unique(x_[col_name].values, return_counts=True)
+    # get a random permutation of indices for the unique values
+    rand_perm = np.random.permutation(len(dif_items)) - 1
+    val_size = 0
+    i = 0
+    val_items = []  # values to go into validation set
+    # put values from the random permutation into validation set until there are enough rows
+    while val_size < val_size_needed:
+        val_items.append(dif_items[rand_perm[i]])
+        val_size += item_counts[rand_perm[i]]
+        i += 1
+    # get an array that says whether a row is in the validation set
+    val_rows = np.in1d(x_[col_name].values, np.asarray(val_items))
+    # split validation and training sets
+    x_val = x_[val_rows]
+    y_val = y_[val_rows]
+    x_train = x_[np.invert(val_rows)]
+    y_train = y_[np.invert(val_rows)]
+    return x_train, y_train, x_val, y_val
 
 
 def ms_error(y, y_hat):
