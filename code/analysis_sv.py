@@ -29,17 +29,11 @@ y_test = pd.read_csv('../../data/solution.csv', encoding="ISO-8859-1")
 test_id = x_test['id']
 
 x_train = x_train.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
-#x_train = x_train['ratio_title']
-#x_train = x_train.values.reshape(-1, 1)
 x_test = x_test.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
-#x_test = x_test['ratio_title']
-#x_test = x_test.values.reshape(-1, 1)
-#columns = x_train.columns
 columns = [column for column in x_train]
 
-
+# normailize features
 min_max_scaler = preprocessing.MinMaxScaler()
-#min_max_scaler = preprocessing.StandardScaler()
 x_train = min_max_scaler.fit_transform(x_train)
 x_test = min_max_scaler.fit_transform(x_test)
 
@@ -71,27 +65,11 @@ grid_obj = grid_obj.fit(x_train, y_train)
 print(grid_obj.best_estimator_)
 
 y_pred = grid_obj.predict(x_test)
+
 # if classification
 #y_pred = le.inverse_transform(y_pred)
 
-def test_rmse(y_test,y_pred):
-
-	public_idx = y_test['Usage']=='Public'
-	private_idx = y_test['Usage']=='Private'
-
-	y_public = y_test[public_idx]['relevance']
-	y_private = y_test[private_idx]['relevance']
-
-	y_pred_public = y_pred[public_idx]
-	y_pred_private = y_pred[private_idx]
-
-	public_rmse = fc.ms_error(y_public,y_pred_public)
-	private_rmse = fc.ms_error(y_private,y_pred_private)
-
-	return public_rmse, private_rmse
-
-public_rmse, private_rmse = test_rmse(y_test,y_pred)
-
+public_rmse, private_rmse = fc.test_rmse(y_test,y_pred)
 
 print('public score',public_rmse)
 print('private score',private_rmse)
@@ -102,7 +80,7 @@ duration = time.time() - start
 print(duration)
 
 
-
+# delete at some point
 '''
 from sklearn.neural_network import MLPRegressor
 from sklearn.neural_network import MLPClassifier
@@ -118,19 +96,22 @@ clf = MLPClassifier()
 
 #pd.DataFrame({"id": test_id, "relevance": y_pred}).to_csv('submission_4.csv',index=False)
 
-
-
 clf = RandomForestRegressor()
 clf = clf.fit(x_train, y_train)
 print(columns)
 print(clf.feature_importances_)
 columns
 
-
 print('len',len(y_pred))
 y_pred = 2.38*np.ones(166693)
 y_ = np.array(y_train)
 print('mean',y_.mean())
+
+#x_train = x_train['ratio_title']
+#x_train = x_train.values.reshape(-1, 1)
+#x_test = x_test['ratio_title']
+#x_test = x_test.values.reshape(-1, 1)
+#columns = x_train.columns
 
 import csv
 

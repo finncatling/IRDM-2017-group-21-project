@@ -205,6 +205,8 @@ def ms_error(y, y_hat):
     ms_error_cal = mean_squared_error(y, y_hat)**0.5
     return ms_error_cal
 
+RMSE = make_scorer(ms_error, greater_is_better=False)
+
 
 def bm25(
         row,
@@ -235,4 +237,20 @@ def bm25(
     return score
 
 
-RMSE = make_scorer(ms_error, greater_is_better=False)
+def test_rmse(y_test,y_pred):
+
+    public_idx = y_test['Usage']=='Public'
+    private_idx = y_test['Usage']=='Private'
+
+    y_public = y_test[public_idx]['relevance']
+    y_private = y_test[private_idx]['relevance']
+
+    y_pred_public = y_pred[public_idx]
+    y_pred_private = y_pred[private_idx]
+
+    public_rmse = ms_error(y_public,y_pred_public)
+    private_rmse = ms_error(y_private,y_pred_private)
+
+    return public_rmse, private_rmse
+
+
