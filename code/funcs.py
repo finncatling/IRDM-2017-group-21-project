@@ -141,10 +141,7 @@ def split_val_set(x_, y_, val_ratio, col_name, seed=None):
     # get all unique values and how many times they occur
     dif_items, item_counts = np.unique(x_[col_name].values, return_counts=True)
     # get a random permutation of indices for the unique values
-    if seed:
-        rnd = RandomState(seed)
-    else:
-        rnd = RandomState()
+    rnd = RandomState(seed)
     rand_perm = rnd.permutation(len(dif_items)) - 1
     val_size = 0
     i = 0
