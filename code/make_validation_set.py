@@ -3,6 +3,8 @@ import pickle
 import funcs
 
 
+seed = 1
+
 pickle_file = '../../data/pre_processed_data.pickle'
 with open(pickle_file, 'rb') as f:
     save = pickle.load(f)
@@ -16,7 +18,7 @@ with open(pickle_file, 'rb') as f:
 # product id sets" ('product_uid')
 #
 x_train_, y_train_, x_val, y_val = funcs.split_val_set(
-    x_train, y_train, 0.3, 'search_term')
+    x_train, y_train, 0.3, 'search_term', seed)
 
 print(x_train.shape)
 print(x_train_.shape)

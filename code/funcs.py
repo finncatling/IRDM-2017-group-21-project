@@ -1,6 +1,7 @@
 import string
 from multiprocessing import Pool, cpu_count
 import numpy as np
+from numpy.random import RandomState
 import pandas as pd
 import nltk
 from nltk.stem.porter import PorterStemmer
@@ -134,13 +135,17 @@ def term_intersection(term1, term2):
     return count
 
 
-def split_val_set(x_, y_, val_ratio, col_name):
+def split_val_set(x_, y_, val_ratio, col_name, seed=None):
     num_points = x_.shape[0]
     val_size_needed = np.floor(num_points * val_ratio).astype(int)
     # get all unique values and how many times they occur
     dif_items, item_counts = np.unique(x_[col_name].values, return_counts=True)
     # get a random permutation of indices for the unique values
-    rand_perm = np.random.permutation(len(dif_items)) - 1
+    if seed:
+        rnd = RandomState(seed)
+    else:
+        rnd = RandomState()
+    rand_perm = rnd.permutation(len(dif_items)) - 1
     val_size = 0
     i = 0
     val_items = []  # values to go into validation set
