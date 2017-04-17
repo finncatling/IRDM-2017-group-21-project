@@ -5,6 +5,7 @@ import pickle
 import time
 import xgboost as xgb
 from sklearn.model_selection import RandomizedSearchCV
+from scipy import stats
 
 
 seed = 1
@@ -30,23 +31,30 @@ drop_cols = ['search_term', 'product_title', 'product_description',
 x_train = x_train.drop(drop_cols, axis=1)
 x_test = x_test.drop(drop_cols, axis=1)
 
+# define distribution for l2 reg parameter during CV
+lower, upper = 0.01, 1000
+mu, sigma = 1, 2
+l2_dist = stats.truncnorm(
+    (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+
 
 print('Finding best parameters...', round((time.time() - start) / 60, 2))
 parameters = {
-    'gamma': np.linspace(0.0, 1.4, num=200),
-    'max_depth': np.arange(1, 14),
-    'min_child_weight': np.linspace(0, 200, num=200),
-    'subsample': np.linspace(0.5, 1, num=200)
+    # 'gamma': np.linspace(0.0, 1.4, num=200),
+    'reg_lambda': l2_dist,
+    'max_depth': np.arange(3, 9),
+    'min_child_weight': np.linspace(40, 150, num=200),
+    'subsample': np.linspace(0.55, 1, num=200)
 }
 
-xgb_mod = xgb.XGBClassifier()
+xgb_mod = xgb.XGBClassifier(n_estimators=100)
 clf = RandomizedSearchCV(
     xgb_mod,
     parameters,
-    5000,
-    scoring=fc.ms_error,
+    1000,
+    # scoring=fc.ms_error,  # RMSE is default for XGB regressor
     n_jobs=-1,
-    verbose=1,
+    verbose=2,
     random_state=seed
 )
 clf.fit(x_train, y_train)
