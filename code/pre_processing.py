@@ -194,10 +194,10 @@ pickle_file = '../../data/pre_processed_data.pickle'
 
 f = open(pickle_file, 'wb')
 save = {
-  'x_train': x_train,
-  'y_train': y_train,
-  'x_test': x_test
-  }
+    'x_train': x_train,
+    'y_train': y_train,
+    'x_test': x_test
+}
 pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
 f.close()
 
