@@ -222,7 +222,7 @@ def k_folds_generator(k, x_, y_, col_name, start_seed=1):
         val_sets[i] = x_val.index
         x_t = x_train
         y_t = y_train
-    val_sets[k - 1] = x_t.index # the last iteration split the set in half
+    val_sets[k - 1] = x_t.index  # the last iteration split the set in half
 
     for i in range(k):
         df.loc[val_sets[i]] = i
