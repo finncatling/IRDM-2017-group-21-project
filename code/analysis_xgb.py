@@ -25,6 +25,7 @@ with open(pickle_file, 'rb') as f:
 
 y_test = pd.read_csv('../../data/solution.csv', encoding="ISO-8859-1")
 test_id = x_test['id']
+ps = fc.k_folds_generator(3, x_train, y_train, 'search_term', start_seed=seed)
 
 drop_cols = ['search_term', 'product_title', 'product_description',
              'product_info', 'attr', 'brand']
@@ -37,22 +38,22 @@ mu, sigma = 1, 2
 l2_dist = stats.truncnorm(
     (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
 
-
 print('Finding best parameters...', round((time.time() - start) / 60, 2))
 parameters = {
     # 'gamma': np.linspace(0.0, 1.4, num=200),
     'reg_lambda': l2_dist,
     'max_depth': np.arange(3, 9),
-    'min_child_weight': np.linspace(40, 150, num=200),
-    'subsample': np.linspace(0.55, 1, num=200)
+    'min_child_weight': stats.uniform(40, 110),  # uniform between 40 and 150
+    'subsample': stats.uniform(0.55, 0.45)  # uniform between 0.55 and 1.0
 }
 
-xgb_mod = xgb.XGBClassifier(n_estimators=100)
+xgb_mod = xgb.XGBRegressor(n_estimators=1000)
 clf = RandomizedSearchCV(
     xgb_mod,
     parameters,
     1000,
     # scoring=fc.ms_error,  # RMSE is default for XGB regressor
+    cv=ps,
     n_jobs=-1,
     verbose=2,
     random_state=seed
@@ -60,19 +61,9 @@ clf = RandomizedSearchCV(
 clf.fit(x_train, y_train)
 print('Best params:', clf.best_params_)
 
-
 print('Finding error from best model...', round((time.time() - start) / 60, 2))
 y_pred = clf.best_estimator_.predict(x_test)
-
-public_idx = y_test['Usage']=='Public'
-private_idx = y_test['Usage']=='Private'
-
-y_public = y_test[public_idx]['relevance']
-y_private = y_test[private_idx]['relevance']
-
-y_pred_public = y_pred[public_idx]
-y_pred_private = y_pred[private_idx]
-
-print('public score', fc.ms_error(y_public, y_pred_public))
-print('private score', fc.ms_error(y_private, y_pred_private))
+scores = fc.test_rmse(y_test, y_pred)
+print('public score:', scores[0])
+print('private score:', scores[1])
 print('Finished.', round((time.time() - start) / 60, 2))

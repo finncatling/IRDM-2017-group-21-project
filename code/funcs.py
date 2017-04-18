@@ -7,6 +7,7 @@ import nltk
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.metrics import mean_squared_error, make_scorer
+from sklearn.model_selection import PredefinedSplit
 from spelling import *
 
 
@@ -161,33 +162,73 @@ def split_val_set(x_, y_, val_ratio, col_name, seed=None):
     return x_train, y_train, x_val, y_val
 
 
-def get_k_folds(k, x_, y_, col_name):
+def get_k_folds(k, x_, y_, col_name, start_seed=None):
     """
-        Return the data set split into k folds
-        :param k: number of folds
-        :param x_: pandas data frame as loaded from pickle after pre-processing
-        :param y_: pandas series of true scores as loaded from pickle
-        :param col_name: name of column to split on e.g. 'product_uid'
-        :return: a list of folds. each fold contains 4 elements - x_train, y_train, x_val, y_val
-        """
+    Return the data set split into k folds
+    :param k: number of folds
+    :param x_: pandas data frame as loaded from pickle after pre-processing
+    :param y_: pandas series of true scores as loaded from pickle
+    :param col_name: name of column to split on e.g. 'product_uid'
+    :param start_seed: integer, allows reproducible splitting
+    :return: a list of folds. each fold contains 4 elements - x_train, y_train, x_val, y_val
+    """
     val_sets = []
     x_t = x_
     y_t = y_
     for i in range(k-1):
         ratio_ = 1/(k-i)
-        x_train, y_train, x_val, y_val = split_val_set(x_t, y_t, ratio_, col_name)
+        if start_seed:
+            x_train, y_train, x_val, y_val = split_val_set(
+                x_t, y_t, ratio_, col_name, start_seed + i)
+        else:
+            x_train, y_train, x_val, y_val = split_val_set(x_t, y_t, ratio_, col_name)
         val_sets.append([x_val, y_val])
         x_t = x_train
         y_t = y_train
-    val_sets.append([x_t, y_t]) # the last iteration split the set in half
+    val_sets.append([x_t, y_t])  # the last iteration split the set in half
     folds = []
     for i in range(k):
-        train_list_x = [val_sets[j][0] for j in range(len(val_sets)) if j != i] # all other folds will be used for training
+        train_list_x = [val_sets[j][0] for j in range(
+            len(val_sets)) if j != i]  # all other folds will be used for training
         train_list_y = [val_sets[j][1] for j in range(len(val_sets)) if j != i]
         x_train = pd.concat(train_list_x, axis=0, ignore_index=True)
         y_train = pd.concat(train_list_y, axis=0, ignore_index=True)
         folds.append([x_train, y_train, val_sets[i][0], val_sets[i][1]])
     return folds
+
+
+def k_folds_generator(k, x_, y_, col_name, start_seed=1):
+    """Adapts get_k_folds into a generator object for use with sklearn.
+
+    :param k: number of folds
+    :param x_: pandas data frame as loaded from pickle after pre-processing
+    :param y_: pandas series of true scores as loaded from pickle
+    :param col_name: name of column to split on e.g. 'product_uid'
+    :param start_seed: integer, allows reproducible splitting
+    :return: cross validation generator object
+    """
+    val_sets = dict()
+    df = pd.DataFrame({'test_fold': np.zeros(len(x_))})
+    x_t = x_
+    y_t = y_
+    for i in range(k - 1):
+        ratio_ = 1 / (k - i)
+        if start_seed:
+            x_train, y_train, x_val, y_val = split_val_set(
+                x_t, y_t, ratio_, col_name, start_seed + i)
+        else:
+            x_train, y_train, x_val, y_val = split_val_set(
+                x_t, y_t, ratio_, col_name)
+        val_sets[i] = x_val.index
+        x_t = x_train
+        y_t = y_train
+    val_sets[k - 1] = x_t.index # the last iteration split the set in half
+
+    for i in range(k):
+        df.loc[val_sets[i]] = i
+    df.test_fold.astype(int, inplace=True)
+
+    return PredefinedSplit(df.test_fold.values)
 
 
 def word_intersection(term1, term2):
@@ -237,10 +278,10 @@ def bm25(
     return score
 
 
-def test_rmse(y_test,y_pred):
+def test_rmse(y_test, y_pred):
 
-    public_idx = y_test['Usage']=='Public'
-    private_idx = y_test['Usage']=='Private'
+    public_idx = y_test['Usage'] == 'Public'
+    private_idx = y_test['Usage'] == 'Private'
 
     y_public = y_test[public_idx]['relevance']
     y_private = y_test[private_idx]['relevance']
@@ -248,8 +289,8 @@ def test_rmse(y_test,y_pred):
     y_pred_public = y_pred[public_idx]
     y_pred_private = y_pred[private_idx]
 
-    public_rmse = ms_error(y_public,y_pred_public)
-    private_rmse = ms_error(y_private,y_pred_private)
+    public_rmse = ms_error(y_public, y_pred_public)
+    private_rmse = ms_error(y_private, y_pred_private)
 
     return public_rmse, private_rmse
 
