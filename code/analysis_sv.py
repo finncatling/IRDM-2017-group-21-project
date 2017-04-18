@@ -11,8 +11,9 @@ from sklearn.svm import SVC
 from sklearn import preprocessing
 from sklearn.cross_validation import ShuffleSplit
 from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 start = time.time()
-r = 0 
+seed = 1
 
 pickle_file = '../../data/pre_processed_data_ff.pickle'
 
@@ -27,9 +28,13 @@ with open(pickle_file, 'rb') as f:
 
 y_test = pd.read_csv('../../data/solution.csv', encoding="ISO-8859-1")
 test_id = x_test['id']
+ps = fc.k_folds_generator(3, x_train, y_train, 'search_term', start_seed=seed)
 
-x_train = x_train.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
-x_test = x_test.drop(['search_term','product_title','product_description','product_info','attr','brand'],axis=1)
+
+drop_cols = ['search_term', 'product_title', 'product_description',
+             'product_info', 'attr', 'brand']
+x_train = x_train.drop(drop_cols, axis=1)
+x_test = x_test.drop(drop_cols, axis=1)
 columns = [column for column in x_train]
 
 # normailize features
@@ -37,7 +42,8 @@ min_max_scaler = preprocessing.MinMaxScaler()
 x_train = min_max_scaler.fit_transform(x_train)
 x_test = min_max_scaler.fit_transform(x_test)
 
-''' conver to labels for classifcation
+'''
+#convert to labels for classifcation
 from sklearn import preprocessing
 le = preprocessing.LabelEncoder()
 le.fit([1.0,1.25,1.33,1.5,1.67,1.75,2.0,2.25,2.33,2.5,2.67,2.75, 3])
@@ -45,18 +51,41 @@ y_train = le.transform(y_train)
 '''
 
 #clf = SVC()
-#clf = SVR()
+clf = SVR()
 #clf = LinearSVC()
-clf = LinearSVR()
+#clf = LinearSVR(random_state=seed)
+
+'''
+parameters = {'C': [10**x for x in np.arange(-5,3,0.25)], 
+'epsilon': [10**x for x in np.arange(-5,2,0.25)], 
+'fit_intercept': [True,False],
+'loss':['epsilon_insensitive','squared_epsilon_insensitive']}
 
 
-parameters = {'C': [0.001]}#,'epsilon': [1e-5,1e-3,0.1]}#,0.01,0.1,1]}#,'gamma': [0.0001],'max_iter': [50000]}#'degree':[1,2,3,4,5]}
+parameters = {'C': [10**x for x in np.arange(-5,3,0.25)], 
+'epsilon': [10**x for x in np.arange(-5,2,0.25)], 
+'degree':[x for x in np.arange(1,10,1)],
+'gamma': [10**x for x in np.arange(-5,2,0.25)]}
+'''
+
+print([10**x for x in np.arange(-4,3,1.0)])
+
+parameters = {'C': [1]}#10**x for x in np.arange(-4,3,1.0)]}
 
 # create cross-validation sets from the training data
-cv = ShuffleSplit(x_train.shape[0], n_iter = 3, test_size = 0.33, random_state = r)
+#cv = ShuffleSplit(x_train.shape[0], n_iter = 3, test_size = 0.33, random_state = seed)
 
 # perform grid search on the regressor using the r^2 as the scoring method
-grid_obj = GridSearchCV(clf, parameters, scoring=fc.RMSE, cv=cv)
+#grid_obj = GridSearchCV(clf, parameters, scoring=fc.RMSE, cv=cv)
+
+grid_obj = RandomizedSearchCV(
+    clf,
+    parameters,
+    1,
+    cv=ps,
+    random_state=seed
+)
+
 
 # fit the grid search object to the training data and find the optimal parameters
 grid_obj = grid_obj.fit(x_train, y_train)
@@ -64,7 +93,7 @@ grid_obj = grid_obj.fit(x_train, y_train)
 # print the estimator
 print(grid_obj.best_estimator_)
 
-y_pred = grid_obj.predict(x_test)
+y_pred = grid_obj.best_estimator_.predict(x_test)
 
 # if classification
 #y_pred = le.inverse_transform(y_pred)
@@ -79,6 +108,10 @@ print(y_pred[:100])
 duration = time.time() - start
 print(duration)
 
+
+#abc = [10**x for x in np.arange(-5,2,0.25)]
+
+#print(abc)
 
 # delete at some point
 '''
