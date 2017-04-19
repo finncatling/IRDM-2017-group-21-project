@@ -41,18 +41,19 @@ l2_dist = stats.truncnorm(
 print('Finding best parameters...', round((time.time() - start) / 60, 2))
 parameters = {
     # 'gamma': np.linspace(0.0, 1.4, num=200),
+    # 'n_estimators': np.arange(100, 1001),
     'reg_lambda': l2_dist,
     'max_depth': np.arange(3, 14),
     'min_child_weight': stats.uniform(40, 110),  # uniform between 40 and 150
     'subsample': stats.uniform(0.55, 0.45)  # uniform between 0.55 and 1.0
 }
 
-xgb_mod = xgb.XGBRegressor(n_estimators=1000)
+xgb_mod = xgb.XGBRegressor(n_estimators=100)
 clf = RandomizedSearchCV(
     xgb_mod,
     parameters,
-    300,
-    scoring=fc.ms_error,
+    100,
+    # scoring=fc.ms_error,
     cv=ps,
     n_jobs=-1,
     verbose=2,
