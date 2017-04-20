@@ -1,6 +1,7 @@
 
 # coding: utf-8
-
+# This code runs one layer neural net with relu activaiton fucntion.
+# Input vectors are: search term, product title, product description and brand name
 # # First Upload Data Files
 
 import numpy as np
@@ -30,11 +31,9 @@ with open(data, 'rb') as f:
   print('training size', x_train.shape, y_train.shape)
   print('test size', x_test.shape)
 
-
-
+# Creating dictionary  
 df['Values'] = df.ix[:, df.columns != 'Word_name'].values.tolist()
 df['Mean'] = df.ix[:, df.columns != 'Word_name'].mean(axis = 1)
-
 
 print("About to create a final dictionary!")
 dict1 = df.set_index('Word_name')['Mean'].to_dict()
@@ -42,12 +41,10 @@ dict1 = df.set_index('Word_name')['Mean'].to_dict()
 print("Created Dictionary!")
 
 
-
-# concatenate train and test
+# Concatenate train and test
 x_all = pd.concat((x_train, x_test), axis=0, ignore_index=True)
 
 print("About to convert words to numerical values")
-
 
 # Converting words inside each search_term/product_title/... to numeric values
 def processInput(col, i, s):
@@ -58,8 +55,8 @@ def processInput(col, i, s):
             s[col].iloc[i][w] = '0'
     s[col][i] = sum(float(j) for j in s[col][i])
 
+# Running in parallel cpus, to save time, but still slow...
 num_cores = multiprocessing.cpu_count()
-
 results = Parallel(n_jobs=num_cores)(delayed(processInput)(col, i, x_all)
                                      for col in ['product_title', 'search_term', 'product_description', 'brand']
                                      for i in range(0, len(x_all[col])))
@@ -80,7 +77,7 @@ results = Parallel(n_jobs=num_cores)(delayed(processInput)(col, i, x_all)
 
 print("Converted words to numerical values")
 
-# separate train and test
+# Separate train and test
 train_size = x_train.shape[0]  # TODO: check train/test sizes are as expected
 x_train = x_all[:][:train_size]
 x_test = x_all[:][train_size:]
@@ -89,9 +86,6 @@ print('x_test shape', x_test.shape)
 
 
 # # Modeling
-
-# In[ ]:
-
 import numpy
 import pandas
 from keras.models import Sequential
@@ -103,8 +97,6 @@ from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
 
-
-# In[ ]:
 
 # fix random seed for reproducibility
 seed = 7
@@ -130,7 +122,6 @@ def baseline_model():
 
 # # Cross Validation
 
-
 kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
 
 print("About to build a model")
@@ -142,19 +133,16 @@ print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 print("Predicting relevance values of test data set")
 preds = model.predict(x_test)
 
-
+# Saving predicted values for test dataset
 solution = pd.DataFrame({"id":x_test.Id, "relevance":preds})
 solution.to_csv("DR.csv", index=False, header=True)
 
 
-# In[ ]:
-
 print('Finished in', round((time.time() - start) / 60, 2), 'minutes.')
 
+# Getting weights used for linear combinations
 for layer in model.layers:
     weights = layer.get_weights() # list of numpy arrays
 
 print(weights)
 
-
-# In[ ]:
