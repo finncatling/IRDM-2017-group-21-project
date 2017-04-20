@@ -1,5 +1,6 @@
 
 # coding: utf-8
+# This piece of code creates a vocabulary out of words in "poduct title", "product description", "search term" and "brand" of the product
 
 # Load libraries
 import numpy as np
