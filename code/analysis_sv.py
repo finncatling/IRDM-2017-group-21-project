@@ -8,6 +8,7 @@ from sklearn.svm import SVR
 from sklearn.svm import SVC
 from sklearn import preprocessing
 from sklearn.model_selection import RandomizedSearchCV
+seed=1
 
 pickle_file = '../../data/pre_processed_data_ff.pickle'
 
@@ -26,7 +27,6 @@ ps = fc.k_folds_generator(3, x_train, y_train, 'search_term', start_seed=seed)
 
 drop_cols = ['search_term', 'product_title', 'product_description',
              'product_info', 'attr', 'brand']
-
 x_train = x_train.drop(drop_cols, axis=1)
 x_test = x_test.drop(drop_cols, axis=1)
 
