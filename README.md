@@ -19,3 +19,8 @@ This is how the pre-processing.py and analysis.py files refer to the directories
 - create_vocab.py creates a vocabulary for running neural nets out of search_term, product_title, product_description and brand name (extracted feature) features. It loads pickle file which is generated from pre_processing.py file with switch stem = false. Location of the file to load is https://drive.google.com/open?id=0Bylsb5Tv26G-SzE4S0xzMHEtZmM
 - Vocab_ib_GloVe.py converts vocabulary word values to numeric vectors in GloVe.
 - nnets_model.py uses vocabulary from Vocab_ib_GloVe.py to feed neural nets and then runs simple feed forward network with one hidden layer.
+- NNRank.py runs the NNRank model and outputs a score
+- mlperceptron.py runs multi-layer perceptron models for classification and regressin and output a final score
+- mlp_variant.py runs the modified 3 class perceptron based model described in the Perceptron section of the report
+- evaluate_saved_model.py is a utility function for evaluating a previously saved perceptron model
+- util_functions.py is a set of perceptron specific model  tuning functions
