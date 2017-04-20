@@ -16,3 +16,6 @@ This is how the pre-processing.py and analysis.py files refer to the directories
 - analysis.py loads the pickle file, ready to train your models.
 - analysis_xgb.py loads the pickle file, finds optimal parameters for the boosted trees model, and calculates public and private test scores for the optimal model
 - analysis_sv.py loads the pickle file, finds optimal parameters for the SVR models, and calculates public and private test scores for the optimal model. Please edit for SVC model.
+- create_vocab.py creates a vocabulary for running neural nets out of search_term, product_title, product_description and brand name (extracted feature) features. It loads pickle file which is generated from pre_processing.py file with switch stem = false. Location of the file to load is https://drive.google.com/open?id=0Bylsb5Tv26G-SzE4S0xzMHEtZmM
+- Vocab_ib_GloVe.py converts vocabulary word values to numeric vectors in GloVe.
+- nnets_model.py uses vocabulary from Vocab_ib_GloVe.py to feed neural nets and then runs simple feed forward network with one hidden layer.
