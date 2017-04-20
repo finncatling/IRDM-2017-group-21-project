@@ -53,7 +53,7 @@ parameters = {'C': [10**x for x in np.arange(-5,4,0.25)],
 grid_obj = RandomizedSearchCV(
     clf,
     parameters,
-    100,
+    1000,
     cv=ps,
     random_state=seed
 )
