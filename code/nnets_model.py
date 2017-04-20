@@ -2,6 +2,10 @@
 # coding: utf-8
 # This code runs one layer neural net with relu activaiton fucntion.
 # Input vectors are: search term, product title, product description and brand name
+# Get 'dl_full_size.pickle' data file at https://drive.google.com/open?id=0Bylsb5Tv26G-Q01qc1REelhsYlU
+# It is pre-processed features file, which contains only relevant 4 features specific for this model
+# 'glove_train_caseless_without_stops.csv' - is generated in Vocab_in_GloVe.py 
+
 # # First Upload Data Files
 
 import numpy as np
