@@ -9,7 +9,6 @@ from scipy import stats
 
 
 seed = 1
-np.set_printoptions(threshold=np.Inf)
 start = time.time()
 pickle_file = '../../data/pre_processed_data.pickle'
 
@@ -41,29 +40,43 @@ l2_dist = stats.truncnorm(
 print('Finding best parameters...', round((time.time() - start) / 60, 2))
 parameters = {
     # 'gamma': np.linspace(0.0, 1.4, num=200),
+    'n_estimators': np.arange(100, 1001),
     'reg_lambda': l2_dist,
     'max_depth': np.arange(3, 14),
     'min_child_weight': stats.uniform(40, 110),  # uniform between 40 and 150
     'subsample': stats.uniform(0.55, 0.45)  # uniform between 0.55 and 1.0
 }
 
-xgb_mod = xgb.XGBRegressor(n_estimators=1000)
+xgb_mod = xgb.XGBRegressor(nthread=1)  # one core per parameter/fold combination
 clf = RandomizedSearchCV(
     xgb_mod,
     parameters,
-    300,
-    scoring=fc.ms_error,
+    1200,
     cv=ps,
-    n_jobs=-1,
+    n_jobs=-1,  # one core per parameter/fold combination
     verbose=2,
     random_state=seed
 )
 clf.fit(x_train, y_train)
 print('Best params:', clf.best_params_)
+"""
+Best params: {
+    'max_depth': 8,
+    'min_child_weight': 72.7303825614961,
+    'n_estimators': 102,
+    'reg_lambda': 0.78590954897833598,
+    'subsample': 0.77313908783830443
+}
+"""
 
 print('Finding error from best model...', round((time.time() - start) / 60, 2))
 y_pred = clf.best_estimator_.predict(x_test)
 scores = fc.test_rmse(y_test, y_pred)
 print('public score:', scores[0])
 print('private score:', scores[1])
+"""
+public score: 0.472809165232
+private score: 0.472050535249
+"""
+
 print('Finished.', round((time.time() - start) / 60, 2))

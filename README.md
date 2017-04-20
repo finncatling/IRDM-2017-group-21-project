@@ -5,8 +5,10 @@ Information retrieval and data mining assignment
 
 - 15/4/17, including punkt tokenisation, stopword and punctuation removal, stemming, cosine similarity, bm25, shuffled training data: https://we.tl/E7vIV6y8kD
 - 15/4/17, including punkt tokenisation, punctuation removal **but stopwords left in**, stemming, cosine similarity, bm25, shuffled training data: https://we.tl/JMcSxVLVAg
-- 18/4/17, including all the features as above files have, except for bm25, stopword and punctuation removal, **but no stemming** https://drive.google.com/open?id=0Bylsb5Tv26G-SzE4S0xzMHEtZmM - this is mainly for GloVe
-- 18/4/17, including vocabulary words from search term, product description and  product name **no stemming** https://drive.google.com/open?id=0Bylsb5Tv26G-Mk5hWjFjSldIaXM
+- 18/4/17, including all the features as above files have, except for bm25, stopword and punctuation removal; **but no stemming** https://drive.google.com/open?id=0Bylsb5Tv26G-SzE4S0xzMHEtZmM - this is mainly for GloVe
+- 18/4/17, including vocabulary words from search term, product description, product title and brand name **no stemming** https://drive.google.com/open?id=0Bylsb5Tv26G-Mk5hWjFjSldIaXM
+- 20/4/17, "dl_full_size.pickle" - file that contains only 4 features needed to run nnets_model.py https://drive.google.com/open?id=0Bylsb5Tv26G-Q01qc1REelhsYlU 
+
 
 
 ### files/directories
